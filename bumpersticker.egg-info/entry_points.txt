@@ -1,4 +1,0 @@
-
-        [console_scripts]
-        bumpersticker=bumpersticker.__main__:main
-    
