@@ -1,18 +1,22 @@
 import os
-import re
 import click
 
 from typing import List
 from requests import request
-from pathlib import Path
+
 from bs4 import BeautifulSoup
-from collections import OrderedDict
 from cmp_version import VersionString
+
+from .output import output_cli
+from .versioning import extract_version_from_label
+# from .scraper import get_page_content
+
+
+# TODO: add support for config file: .tml syntax
+# TODO: bump version
 
 
 ctx = dict()
-reg_v = re.compile("\d.\d")
-
 
 def get_page_content(package_name: str) -> str:
     try:
@@ -30,49 +34,20 @@ def get_page_content(package_name: str) -> str:
         return None
 
 
-def is_prebuit(file_name: str):
-    file_extension = Path(file_name).suffix
-    return file_extension == ".whl" or file_extension == ".egg"
 
 
-def extract_version_from_label(text: str, package_name: str) -> str:
-    text = text.lower()
-    package_name = package_name.lower()
 
-    if is_prebuit(text):
-        package_name = package_name.replace("-", "_")
-
-    text = text.replace(f"{package_name}-", "")
-    v = (
-        text.split("-")[0]
-        .replace(".tar.gz", "")
-        .replace(".win32.exe", "")
-        .replace(".zip", "")
-    )
-    return v
 
 
 def remove_duplicates(versions)-> List[str]:
-    """
-    Simpler version of this would be: list(set(versions)) - but it keeps failing when it runs.
-    """
     vers = set(versions)
     return [v for v in vers]
-    # versions_dict = dict()
-
-    # for v in versions:
-    #     versions_dict[v] = None
-
-    # return list(versions_dict.keys())
 
 
-def get_available_versions(package_name: str):
+def get_available_versions(package_name: str, total_packages: int):
     try:
         versions = []
         page_content = get_page_content(package_name=package_name)
-
-        # if ctx.get('debug'):
-        #     print(page_content)
 
         soup = BeautifulSoup(page_content, "html.parser")
         a_tags = soup.find_all("a")
@@ -89,21 +64,10 @@ def get_available_versions(package_name: str):
 
         unique_versions = remove_duplicates(versions=versions)
         unique_versions = sorted(unique_versions, key=VersionString)
-        # versions = list(set(versions))
-        # versions = list(OrderedDict.fromkeys(versions))
 
         if ctx.get("debug"):
             print("versions")
             print(unique_versions)
-
-        # try:
-        #     versions = list(set(sorted(versions)))
-        #     if ctx.get('debug'):
-        #         print('versions', versions)
-
-        # except Exception as e:
-        #     if ctx.get('debug'):
-        #         print('Error while sorting options', e)
 
         return unique_versions
     except Exception as e:
@@ -162,7 +126,7 @@ def parse_requirements():
                 continue
 
             pkg_name = package.get("package_name")
-            versions = get_available_versions(package_name=pkg_name)
+            versions = get_available_versions(package_name=pkg_name, total_packages=len(lines))
 
             ctx["packages"][pkg_name] = package
             ctx["packages"][pkg_name]["versions"] = versions
@@ -172,7 +136,7 @@ def parse_requirements():
                 current_v_index = versions.index(v)
 
                 ctx["packages"][pkg_name]["versions"] = versions
-                ctx["packages"][pkg_name]["lower_versions"] = versions[0:current_v_index]
+                # ctx["packages"][pkg_name]["lower_versions"] = versions[0:current_v_index]
                 ctx["packages"][pkg_name]["higher_versions"] = versions[current_v_index + 1:]
 
 
@@ -181,41 +145,47 @@ def print_formated():
         print(ctx)
         return
 
-    # output for cli
-    packages = ctx.get("packages")
-    for package_name, package in packages.items():
-        op = package.get("op", "????")
-        v = package.get("current_version", "????")
-        hv = package.get("higher_versions", [])
-        print(f"{package_name} {op} {v}         ", hv)
+    output_cli(context=ctx)
 
 
-@click.command()
+
+# @click.command()
+# @click.option("--index", default="https://pypi.org/simple/", help="pypi index url.")
+# @click.option("-d", "--debug", type=bool, default=False, help="print debugging information")  # https://click.palletsprojects.com/en/8.1.x/options/#boolean-flags
+# @click.option("-o", "--out", default="cli", type=str, help="Output format")
+# def main(index="https://pypi.org/simple/", debug=False, out="cli"):
+#     ctx["cwd"] = os.getcwd()
+#     ctx["index"] = index
+#     ctx["debug"] = debug
+#     ctx["out"] = out
+#     ctx["packages"] = {}
+
+#     if not check_if_requirements_exists():
+#         print(
+#             f"Could not find `requirements.txt` file in current dierctory: {ctx.get('cwd')}."
+#         )
+#     else:
+#         if ctx.get("debug"):
+#             print(ctx)
+
+#         parse_requirements()
+#         print_formated()
+
+
+
+@click.group()
+def bs():
+    pass
+
+@bs.command()
 def list():
-    print("Command List!")
+    print('Command List')
 
 
-@click.command()
-@click.option("--index", default="https://pypi.org/simple/", help="pypi index url.")
-@click.option("-d", "--debug", type=bool, default=False, help="print debugging information")
-@click.option("-o", "--out", default="cli", type=str, help="Output format")
-def main(index="https://pypi.org/simple/", debug=False, out="cli"):
-    ctx["cwd"] = os.getcwd()
-    ctx["index"] = index
-    ctx["debug"] = debug
-    ctx["out"] = out
-    ctx["packages"] = {}
+@bs.command()
+def bump():
+    print('Command Bump')
 
-    if not check_if_requirements_exists():
-        print(
-            f"Could not find `requirements.txt` file in current dierctory: {ctx.get('cwd')}."
-        )
-    else:
-        if ctx.get("debug"):
-            print(ctx)
+cli = click.CommandCollection(sources=[bs])
 
-        parse_requirements()
-        print_formated()
-
-
-main()
+cli()

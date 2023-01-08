@@ -12,6 +12,7 @@ setup(
         'requests>=1.0.1',
         'beautifulsoup4>=3.5.1',
         'cmp_version>=0.7.0',
+        'rich>=13.0.0',
     ],
 
     # entry_points={
@@ -22,7 +23,7 @@ setup(
 
     entry_points = '''
         [console_scripts]
-        bumpersticker=bumpersticker.__main__
+        bumpersticker=bumpersticker.__main__:cli
     '''
 
 )
