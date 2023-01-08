@@ -1,6 +1,6 @@
 from rich.console import Console
 from rich.table import Table
-from rich.progress import Progress
+# from rich.progress import
 
 
 
@@ -32,6 +32,14 @@ def output_cli(context: dict):
         # # print(f"{package_name} {op} {v}         ", hv)
     console = Console()
     console.print(table)
+
+
+def print_formated(ctx: dict) -> None:
+    if ctx.get("out") == "json":
+        print(ctx)
+        return
+
+    output_cli(context=ctx)
 
 
 # def print_progress(package_name: str, current_pks_index: int, total_packages: int):

@@ -7,12 +7,11 @@ from requests import request
 from bs4 import BeautifulSoup
 from cmp_version import VersionString
 
-from .output import output_cli
+from .output import print_formated
 from .versioning import extract_version_from_label
-# from .scraper import get_page_content
+from .file_utils import get_config_from_file
 
 
-# TODO: add support for config file: .tml syntax
 # TODO: bump version
 
 
@@ -140,47 +139,41 @@ def parse_requirements():
                 ctx["packages"][pkg_name]["higher_versions"] = versions[current_v_index + 1:]
 
 
-def print_formated():
-    if ctx.get("out") == "json":
-        print(ctx)
-        return
 
-    output_cli(context=ctx)
-
-
-
-# @click.command()
-# @click.option("--index", default="https://pypi.org/simple/", help="pypi index url.")
-# @click.option("-d", "--debug", type=bool, default=False, help="print debugging information")  # https://click.palletsprojects.com/en/8.1.x/options/#boolean-flags
-# @click.option("-o", "--out", default="cli", type=str, help="Output format")
-# def main(index="https://pypi.org/simple/", debug=False, out="cli"):
-#     ctx["cwd"] = os.getcwd()
-#     ctx["index"] = index
-#     ctx["debug"] = debug
-#     ctx["out"] = out
-#     ctx["packages"] = {}
-
-#     if not check_if_requirements_exists():
-#         print(
-#             f"Could not find `requirements.txt` file in current dierctory: {ctx.get('cwd')}."
-#         )
-#     else:
-#         if ctx.get("debug"):
-#             print(ctx)
-
-#         parse_requirements()
-#         print_formated()
 
 
 
 @click.group()
 def bs():
+    """bs for BumperSticker - and yes, we are aware it stands also for Bullshit - how ironic!"""
     pass
 
-@bs.command()
-def list():
-    print('Command List')
 
+@bs.command()
+@click.option("--index", default="https://pypi.org/simple/", help="pypi index url.")
+@click.option("-d", "--debug", type=bool, default=False, help="print debugging information")  # https://click.palletsprojects.com/en/8.1.x/options/#boolean-flags
+@click.option("-o", "--out", default="cli", type=str, help="Output format")
+def list(index="https://pypi.org/simple/", debug=False, out="cli"):
+    ctx["cwd"] = os.getcwd()
+
+    config = get_config_from_file(ctx=ctx)
+    cli_context = dict()
+
+    ctx["index"] = config.get("index", index)
+    ctx["debug"] = debug
+    ctx["out"] = out
+    ctx["packages"] = {}
+
+    if not check_if_requirements_exists():
+        print(f"Could not find `requirements.txt` file in current dierctory: {ctx.get('cwd')}.")
+    else:
+        if ctx.get("debug"):
+            print(ctx)
+
+
+
+        parse_requirements()
+        print_formated(ctx=ctx)
 
 @bs.command()
 def bump():

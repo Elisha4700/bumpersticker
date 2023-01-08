@@ -13,17 +13,12 @@ setup(
         'beautifulsoup4>=3.5.1',
         'cmp_version>=0.7.0',
         'rich>=13.0.0',
+        'toml>=0.10.2',
     ],
-
-    # entry_points={
-    #   'console_scripts': [
-    #     'bumpersticker = bumpersticker.__main__'
-    #   ]
-    # },
 
     entry_points = '''
         [console_scripts]
         bumpersticker=bumpersticker.__main__:cli
-    '''
+    ''',
 
 )
