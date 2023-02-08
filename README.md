@@ -40,3 +40,10 @@ Bumpersticker will add a `bs-cache` file to your project - you should add it so 
 Bumpersticker can receive configuration in the command line, but you can also give it a config file `.bsrc` or `.bsconfrc` or `bsconf.toml` and it will work with it.
 Configuration file should be in .toml syntax.
 If you pass in options into cli - those options will override the config.
+
+
+# TOOO:
+* When parsing all versions from pip repo - should discard all versions that are with some suffix (rc, alpha, beta)
+* Better print progress - when fetching all package versions
+* resolve configs.
+* bump a version
