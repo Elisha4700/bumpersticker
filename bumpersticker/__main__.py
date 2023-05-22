@@ -29,7 +29,6 @@ def pad(max_len: int, value: str)-> str:
     return value
 
 
-
 def get_page_content(package_name: str) -> str:
     try:
         url = f"{ctx.get('index')}{package_name}"
@@ -138,7 +137,6 @@ def pull_verions_for_packages() -> None:
 
         index = 0
         while not progress.finished:
-
             for package_name, package in ctx.get("packages").items():
                 if "versions" not in ctx["packages"][package_name]:
                     progress.update(task_id, visible=True, description=f"Pulling {pad(max_len=pkg_max_len, value=package_name)}")
@@ -161,7 +159,6 @@ def pull_verions_for_packages() -> None:
 
 
 def parse_requirements() -> None:
-    # FIXME: this function should only parse requirements, and not have to pull all packages.
     with open(get_requirements_file()) as f:
         lines = f.readlines()
         for line in lines:
@@ -209,6 +206,12 @@ def resolve_config(cli_args: dict, conf: dict) -> None:
     ctx["packages"] = {}
 
 
+def build_context(index: str = None, debug: bool = None, out: str = None):
+    ctx["cwd"] = os.getcwd()
+    config = get_config_from_file(ctx=ctx)
+    resolve_config(cli_args=dict(index=index, debug=debug, out=out), conf=config)
+
+
 @click.group()
 def bs():
     """bs for BumperSticker - and yes, we are aware it stands also for Bullshit - how ironic!"""
@@ -222,10 +225,7 @@ def bs():
 )
 @click.option("-o", "--out", default="cli", type=str, help="Output format")
 def list(index: str = None, debug: bool = None, out: str = None) -> None:
-    ctx["cwd"] = os.getcwd()
-    config = get_config_from_file(ctx=ctx)
-    resolve_config(cli_args=dict(index=index, debug=debug, out=out), conf=config)
-
+    build_context(index, debug, out)
     print("Context resolveds: ", ctx)
 
     if not check_if_requirements_exists():
@@ -249,9 +249,7 @@ def list(index: str = None, debug: bool = None, out: str = None) -> None:
 def bump(
     index: str = None, debug: bool = None, out: str = None, package: str = None
 ) -> None:
-    ctx["cwd"] = os.getcwd()
-    config = get_config_from_file(ctx=ctx)
-    resolve_config(cli_args=dict(index=index, debug=debug, out=out), conf=config)
+    build_context(index, debug, out)
 
     print("Context resolveds: ", ctx)
 
@@ -272,8 +270,18 @@ def bump(
         )
         return
 
-    # Proceed to bumping the version
-
+    pkg_dict = ctx.get("packages", {}).get(package)
+    versions = get_available_versions(package_name=package)
+    v = pkg_dict.get("current_version")
+    print(pkg_dict)
+    if v in versions:
+        current_v_index = versions.index(v)
+        higher_versions = versions[current_v_index + 1 :]
+        print(higher_versions)
+        next_v = higher_versions[0]
+        print(f'Bumping {package} ({v}) --> to version: {next_v}')
+    else:
+        print(f'Could not locate current version of {package} in all available versions for this package.')
 
 cli = click.CommandCollection(sources=[bs])
 

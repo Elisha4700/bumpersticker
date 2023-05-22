@@ -17,7 +17,7 @@ And yes, we are aware that bs stands for bullshit as well - isn't it ironic.
 ## Usage:
 This tool was designed to be used in pipeline, but its perfectly acceptable to be used manually as well.
 
-`$ bumpersticker init` - Will generate a cofnig file, if none exists.
+<!-- `$ bumpersticker init` - Will generate a cofnig file, if none exists. -->
 `$ bumpersticker list` - Will list all your packages and their available upgrades.
 `$ bumpersticker bump` - Will check what versions are available for each package and will choose a package - and a new version. will update requirements.txt you cna then `pip3 install -r requirements.txt and then check if it works.
 
