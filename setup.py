@@ -9,7 +9,7 @@ setup(
     packages=find_packages(),
 
     install_requires=[
-        'requests>=1.0.1',
+        'aiohttp>=3.9.5',
         'beautifulsoup4>=3.5.1',
         'cmp_version>=0.7.0',
         'rich>=13.0.0',

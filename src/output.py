@@ -1,3 +1,5 @@
+
+from typing import Any
 from rich.console import Console
 from rich.table import Table
 # from rich.progress import
@@ -12,8 +14,12 @@ def convert_list_to_string(versions):
 
     return out
 
-def output_cli(context: dict):
+def output_cli(context: dict[str, Any]):
     packages = context.get("packages")
+
+    if not packages:
+        return
+
     table = Table(title="Summary")
 
     table.add_column("Package Name", justify="right", no_wrap=True)
