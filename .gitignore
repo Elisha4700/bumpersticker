@@ -172,3 +172,7 @@ poetry.toml
 
 
 bumpersticker.egg-info
+
+.vscode
+.mypy_cache
+.pytest_cache
