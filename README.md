@@ -1,4 +1,4 @@
-# Bumpersticker [![MIT License][license-badge]](LICENSE.md)
+# Bumpersticker [![MIT License][license-badge]](LICENSE.md)]
 
 
 # Motivation
