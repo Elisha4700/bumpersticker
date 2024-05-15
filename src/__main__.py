@@ -117,21 +117,22 @@ def update_package_version_in_requirements_file(
     requirements_parsed_lines = parse_requirements()
 
     req_file = get_requirements_file()
-    print("req file: ", req_file)
 
-    with open(get_requirements_file(), "w") as f:
+    logging.debug(f"req file: {req_file}")
+
+    with open(req_file, "w") as f:
         for package in requirements_parsed_lines:
             line = package.line
             if package.package_name == package_name:
                 line = f"{package.package_name}=={package_version}\n"
             f.write(line)
-            print("Write: ", line, end="")
+            logging.debug(f"Write: {line}")
 
 
 def print_package_versions(package_versions: List[PackageVersion]) -> None:
     for pack_v in package_versions:
         if not (pack_v.is_empty or pack_v.is_comment or pack_v.is_error):
-            print('Package version: ', pack_v.package_name, ' -> ', pack_v.current_version)
+            logging.debug(f'Package version: {pack_v.package_name} -> {pack_v.current_version}')
 
 
 def pretty_print_context(ctx: dict) -> None:
@@ -149,7 +150,7 @@ def is_package_in_testing(package_name: str) -> bool:
 
 def resolve_next_package_to_upgrade(
     packages: dict[str, dict[str, str]]
-) -> dict[str, str]:
+) -> Optional[dict[str, str]]:
     for package_name, pack in packages.items():
         if not is_package_in_testing(package_name=package_name):
             if pack.get("current_version") and len(pack.get("higher_versions", [])) > 0:
@@ -157,7 +158,7 @@ def resolve_next_package_to_upgrade(
                         "from_version": str(pack.get("current_version")),
                         "to_version": str(pack.get("higher_versions", [])[0])}
 
-    return {'p': "1"}
+    return None
 
 
 def pad(max_len: int, value: str) -> str:
@@ -513,6 +514,10 @@ def bump(
 
     package_to_test = resolve_next_package_to_upgrade(packages=packages)
 
+    if package_to_test is None:
+        logging.warn("Cannot fins a package to bump.")
+        return
+
     ##################################################
     logging.debug("package_to_test: ")
     logging.debug(package_to_test)
@@ -563,6 +568,8 @@ def ok(debug: bool = False) -> None:
 def stick(debug: bool = False) -> None:
     if debug:
         logger.setLevel(level=logging.DEBUG)
+
+    build_context(debug=debug)
 
     cache = get_cache()
     package_in_test = cache.get(TESTING_CACHE_KEY, None)
