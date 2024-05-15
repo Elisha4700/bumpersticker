@@ -1,8 +1,32 @@
+# Bumpersticker [![MIT License][license-badge]](LICENSE.md)
+
+
 # Motivation
+This is a cli tool with a few commands - to semi-automatically upgrade your package versions, one by one, one version at a time: giving you the ability to test the code, and descide to keep the newly bumped version or not.
+
+To bump the version: `bs bump`
+
+To keep the current bumped version: `bs ok`
+
+To revert the change (to previous) version: `bs stick`
+
+
+
+
+
+
 Ability to automate (safely) package upgrade.
 Most production projects has all packages in requirements.txt set in `==` Thus meaning that code was developed and tested with a specific package version.
-After a while - newer versions of packages become avaialble but mostly ignored - since code is already developed, tested, and works (suposedly). If it works that dont touch it, right...??? Well no... it's wrong!
-If the code works - and it gets the job done, why do I care if there is a newer package? right?? WRONG!
+
+After a while - newer versions of packages become avaialble but mostly ignored - since code is already developed, tested, and works (suposedly).
+
+If it works that dont touch it, right...???
+Well no... it's wrong!
+
+If the code works - and it gets the job done, why do I care if there is a newer package? right??
+
+**WRONG!**
+
 See packages are made from code - and code has a tendency to have vulnerabilities. Those vulnerabilities could be expolited. You can chenge your code to be more secure, but what if the vulnerability lies inside a package, or a package that installed by another package? Food for thought.
 You can upgrade all your packages by hand, but we belive that tedious tasks shouold be automated.
 
@@ -18,24 +42,30 @@ And yes, we are aware that bs stands for bullshit as well - isn't it ironic.
 This tool was designed to be used in pipeline, but its perfectly acceptable to be used manually as well.
 
 <!-- `$ bumpersticker init` - Will generate a cofnig file, if none exists. -->
-`$ bumpersticker list` - Will list all your packages and their available upgrades.
-`$ bumpersticker bump` - Will check what versions are available for each package and will choose a package - and a new version. will update requirements.txt you cna then `pip3 install -r requirements.txt and then check if it works.
+`$ bs list` - Will list all your packages and their available upgrades.
+`$ bs bump` - Will check what versions are available for each package and will choose a package - and a new version. will update requirements.txt you cna then `pip3 install -r requirements.txt and then check if it works.
 
-`$ bumpersticker revert` - will revert an upgraded package to its previous version.
-**NOTE**: This will work only if you previously ran `$ bumpersticker bump`
+`$ bs stick` - will revert an upgraded package to its previous version.
+**NOTE**: This will work only if you previously ran `$ bs bump`
+
+
+
+### Manual Usage:
+
+->
 
 
 ### How to use it in pipeline:
 Before running tests: do
-`$ bumpersticker bump`
+`$ bs bump`
 It will choose a package that could be upgraded (a newer version is available on pip repository) to a higher version. will update `requirements.txt`
 and next time build runs, it will install a newer version of that package. If tests will pass, then everything is OK and its fine to use the newer package.
 If tests fail, pipeline should tell bumpersticker to revert that previous change:
-`$ bumpersticker revert`
+`$ bs stick`
 Bumpersticker will know from its own cache which package needs to be reverted. This means that newer version of that package breaks your code. You can add another step to your pipeline to send you an email or slack notification about what happeened (optional).
 
 
-Bumpersticker will add a `bs-cache` file to your project - you should add it so your source control.
+Bumpersticker uses a chace file (`.bs-lock.json`) under the hood to keep track all of the bumed & sticked verions. And you should check this in into your source control.
 
 Bumpersticker can receive configuration in the command line, but you can also give it a config file `.bsrc` or `.bsconfrc` or `bsconf.toml` and it will work with it.
 Configuration file should be in .toml syntax.
