@@ -2,8 +2,6 @@
 from typing import Any
 from rich.console import Console
 from rich.table import Table
-# from rich.progress import
-
 
 
 def convert_list_to_string(versions):
