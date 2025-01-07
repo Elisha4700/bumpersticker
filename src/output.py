@@ -33,6 +33,7 @@ def output_cli(context: dict[str, Any]):
 
         table.add_row(package_name, v, convert_list_to_string(hv))
 
+
         # out = Padding(, 20)
         # print(out, op)
         # # print(f"{package_name} {op} {v}         ", hv)
